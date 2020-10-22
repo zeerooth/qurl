@@ -3,7 +3,11 @@ use reqwest::Response;
 use reqwest::{Client, RequestBuilder};
 use reqwest::header::HeaderMap;
 use std::cmp::Ordering;
+
 pub mod parser;
+
+#[cfg(test)]
+mod tests;
 
 fn split_key_value<'a>(string: &'a str) -> Option<(&'a str, &'a str)> {
     let splt = string.splitn(2, "=").collect::<Vec<&str>>();
@@ -29,13 +33,15 @@ pub enum Method {
 
 pub struct RequestConfig {
     pub headers: Option<HeaderMap>,
-    pub username: Option<String>,
-    pub password: Option<String>
+    pub auth: Option<(String, Option<String>)>,
+    pub bearer: Option<String>,
+    pub json: Option<String>,
+    pub body: Option<String>
 }
 
 impl RequestConfig {
     pub fn new() -> RequestConfig {
-        RequestConfig {headers: None, username: None, password: None}
+        RequestConfig {headers: None, auth: None, bearer: None, json: None, body: None}
     }
 }
 
@@ -59,18 +65,21 @@ impl RequestParser {
     }
 
     pub fn build_request(mut self) -> RequestBuilder{
-        match self.config.username {
-            Some(uname) => { 
-                self.reqwest_builder = self.reqwest_builder.basic_auth(uname, self.config.password);
-            },
-            None => {}
+        if let Some(headers) = self.config.headers {
+            self.reqwest_builder = self.reqwest_builder.headers(headers);
         };
-        match self.config.headers {
-            Some(h) => {
-                self.reqwest_builder = self.reqwest_builder.headers(h);
-            }
-            None => {}
-        }
+        if let Some(auth) = self.config.auth {
+            self.reqwest_builder = self.reqwest_builder.basic_auth(auth.0, auth.1);
+        };
+        if let Some(bearer) = self.config.bearer {
+            self.reqwest_builder = self.reqwest_builder.bearer_auth(bearer);
+        };
+        if let Some(body) = self.config.body {
+            self.reqwest_builder = self.reqwest_builder.body(body);
+        };
+        if let Some(json) = self.config.json {
+            self.reqwest_builder = self.reqwest_builder.json(json.as_str());
+        };
         self.reqwest_builder
     }
 }

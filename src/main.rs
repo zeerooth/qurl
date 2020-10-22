@@ -38,6 +38,47 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .validator(cmd_header_parser)
         )
         .arg(
+            Arg::new("username")
+                .about("basic auth username")
+                .takes_value(true)
+                .short('u')
+                .long("username")
+                .required(false)
+        )
+        .arg(
+            Arg::new("password")
+                .about("basic auth password")
+                .takes_value(true)
+                .short('p')
+                .long("password")
+                .required(false)
+                .requires("username")
+        )
+        .arg(
+            Arg::new("bearer")
+                .about("bearer auth token")
+                .takes_value(true)
+                .short('b')
+                .long("bearer")
+                .required(false)
+        )
+        .arg(
+            Arg::new("body")
+                .about("request body")
+                .takes_value(true)
+                .short('B')
+                .long("body")
+                .required(false)
+        )
+        .arg(
+            Arg::new("json")
+                .about("json data")
+                .takes_value(true)
+                .short('J')
+                .long("json")
+                .required(false)
+        )
+        .arg(
             Arg::new("verbose")
                 .about("verbose output")
                 .short('v')
@@ -89,6 +130,16 @@ fn parse_arguments(matches: &clap::ArgMatches) -> Result<RequestParser, String> 
             }
         }
         config.headers = Some(header_map);
+    }
+    if let Some(username) = matches.value_of("username") {
+        let password = matches.value_of("password");
+        config.auth = Some((username.to_owned(), password.map(str::to_string)));
+    }
+    if let Some(body) = matches.value_of("body") {
+        config.body = Some(body.to_owned());
+    }
+    if let Some(json) = matches.value_of("json") {
+        config.body = Some(json.to_owned());
     }
     Ok(RequestParser::new(method, url.to_owned(), config))
 }

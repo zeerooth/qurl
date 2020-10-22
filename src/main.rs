@@ -1,9 +1,11 @@
-use std::env;
 use std::process;
 use qurl::Method;
 use qurl::RequestParser;
+use qurl::RequestConfig;
+use qurl::parser::{cmd_header_parser, delimiter_parser};
 use clap::{App, Arg, ArgGroup};
 use colored::*;
+use reqwest::header::{HeaderName, HeaderMap, HeaderValue};
 
 use std::collections::HashMap;
 
@@ -25,97 +27,68 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .index(2)
                 .required(true)
         )
-        // Add the version arguments
-        .arg("--username      'set version manually'")
-        .arg("--password      'auto inc major'")
-        .arg("--bearer        'auto inc minor'")
-        // Create a group, make it required, and add the above arguments
-        .group(
-            ArgGroup::new("authentication")
-                .args(&["username", "password", "bearer"]),
-        )
-        // Arguments can also be added to a group individually, these two arguments
-        // are part of the "input" group which is not required
-        .arg(Arg::from("[INPUT_FILE] 'some regular input'").group("input"))
-        .arg(Arg::from("--spec-in [SPEC_IN] 'some special input argument'").group("input"))
-        // Now let's assume we have a -c [config] argument which requires one of
-        // (but **not** both) the "input" arguments
         .arg(
             Arg::new("header")
-                .about("add a header") // Displayed when showing help info
-                .takes_value(true) // MUST be set to true in order to be an "option" argument
-                .short('H') // This argument is triggered with "-i"
-                .long("header") // This argument is triggered with "--input"
-                .multiple(true) // Set to true if you wish to allow multiple occurrences
-                .required(false) // By default this argument MUST be present
-                .min_values(2)
-                .max_values(2)
+                .about("add a header")
+                .takes_value(true)
+                .short('H')
+                .long("header")
+                .required(false)
+                .multiple(true)
+                .validator(cmd_header_parser)
+        )
+        .arg(
+            Arg::new("verbose")
+                .about("verbose output")
+                .short('v')
+                .long("verbose")
+                .required(false)
         )
         .get_matches();
-
-    let request = parse_arguments(env::args()).unwrap_or_else(|err| {
-        eprintln!("{} {}", "Problem parsing arguments:".red(), err.red());
+    let verbose = matches.is_present("verbose");
+    let request = parse_arguments(&matches).unwrap_or_else(|err| {
+        eprintln!("{}: {} {}", "error".bright_red(), "Problem parsing arguments:", err);
         process::exit(1);
     });
-    let req_config = match request.parse() {
-        Ok(config) => config,
-        Err(err) => {
-            eprintln!("{} {}", "Problem parsing arguments:".red(), err.red());
-            process::exit(1);
-        }
-    };
-    let built_request = request.build_request(req_config);
-    println!("[DEBUG] Making a request:\n{:#?}", built_request);
+    let built_request = request.build_request();
+    if verbose { println!("[DEBUG] Making a request:\n{:#?}", built_request); }
     let response = built_request.send().await?;
-    println!("[DEBUG] Received response:\n{:#?}", response);
+    if verbose { println!("[DEBUG] Received response:\n{:#?}", response); }
     println!("{}", response.text().await?);
-    println!("{:#?}", "[DEBUG] Program finished successfully".green());
+    if verbose { println!("{}", "[DEBUG] Program finished successfully".green()); }
     Ok(())
 }
 
-fn parse_arguments(mut args: env::Args) -> Result<RequestParser, &'static str> {
-    args.next();
-    let method = match args.next() {
-        Some(arg) => match arg.as_str() {
+fn parse_arguments(matches: &clap::ArgMatches) -> Result<RequestParser, String> {
+    let method = match matches.value_of("method") {
+        Some(arg) => match arg {
             "get" => Method::GET,
             "post" => Method::POST,
             "put" => Method::PUT,
-            _ => return Err("Method is incorrect, must be one of those: get, post, put, patch, head, delete")
+            _ => return Err(String::from("Method is incorrect, must be one of those: get, post, put, patch, head, delete"))
         },
-        None => return Err("No method argument")
+        None => return Err(String::from("No method argument"))
     };
-    let url = match args.next() {
+    let url = match matches.value_of("url") {
         Some(arg) => arg,
-        None => return Err("No url provided")
+        None => return Err(String::from("No url provided"))
     };
-    let mut data = HashMap::<String, Vec<String>>::new();
-    let mut current_key = String::new();
-    loop {
-        match args.next() {
-            Some(arg) => {
-                let mut arg_name = arg;
-                if arg_name.starts_with("--") {
-                    arg_name = arg_name[2..].to_string();
-                }
-                else if arg_name.starts_with("-") {
-                    arg_name = arg_name[1..].to_string();
-                    arg_name = match arg_name.as_str() {
-                        "H" => String::from("header"),
-                        _ => return Err("Short argument doesn't exist")
+    let mut config = RequestConfig::new();
+    if let Some(headers) = matches.values_of("header") {
+        let mut header_map = HeaderMap::new();
+        for header in headers {
+            match delimiter_parser(header, ":") {
+                Ok(parsed) => { 
+                    let header_name = match HeaderName::from_bytes(parsed.0.as_bytes()) {
+                        Ok(h) => h,
+                        Err(_err) => { return Err(format!("Invalid header name: '{}'", parsed.0)) }
                     };
-                }
-                else if !current_key.is_empty() {
-                    data.entry(current_key.clone()).or_insert(Vec::new()).push(arg_name);
-                    continue;
-                }
-                else {
-                    return Err("Bad argument");
-                }
-                current_key = arg_name.clone();
-                data.entry(arg_name).or_insert(Vec::new());
-            },
-            None => break
-        };
+                    header_map.insert(header_name, HeaderValue::from_str(parsed.1).unwrap()); 
+                },
+                Err(_msg) => {}
+            }
+        }
+        config.headers = Some(header_map);
     }
-    return Ok(RequestParser::new(method, url, data))
+    Ok(RequestParser::new(method, url.to_owned(), config))
 }

@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 use reqwest::Response;
 use reqwest::{Client, RequestBuilder};
-use reqwest::header::{HeaderName, HeaderMap, HeaderValue};
+use reqwest::header::HeaderMap;
 use std::cmp::Ordering;
+pub mod parser;
 
 fn split_key_value<'a>(string: &'a str) -> Option<(&'a str, &'a str)> {
     let splt = string.splitn(2, "=").collect::<Vec<&str>>();
@@ -27,85 +28,49 @@ pub enum Method {
 }
 
 pub struct RequestConfig {
-    headers: Option<HeaderMap>,
-    username: Option<String>,
-    password: Option<String>
+    pub headers: Option<HeaderMap>,
+    pub username: Option<String>,
+    pub password: Option<String>
+}
+
+impl RequestConfig {
+    pub fn new() -> RequestConfig {
+        RequestConfig {headers: None, username: None, password: None}
+    }
 }
 
 pub struct RequestParser {
     method: Method,
     url: String,
-    data: HashMap<String, Vec<String>>,
+    config: RequestConfig,
     reqwest_client: Client,
     reqwest_builder: RequestBuilder
 }
 
 impl RequestParser {
-    pub fn new(method: Method, url: String, data: HashMap<String, Vec<String>>) -> RequestParser {
+    pub fn new(method: Method, url: String, config: RequestConfig) -> RequestParser {
         let client = Client::new();
         let req_builder = match method {
             Method::GET => client.get(url.as_str()),
             Method::POST => client.post(url.as_str()),
             Method::PUT => client.put(url.as_str())
         };
-        RequestParser {method: method, url: url, data: data, reqwest_client: client, reqwest_builder: req_builder }
+        RequestParser {method: method, url: url, config: config, reqwest_client: client, reqwest_builder: req_builder }
     }
 
-    fn basic_auth(mut self, auth: (Option<String>, Option<String>)) -> Self {
-        match auth.0 {
+    pub fn build_request(mut self) -> RequestBuilder{
+        match self.config.username {
             Some(uname) => { 
-                self.reqwest_builder = self.reqwest_builder.basic_auth(uname, auth.1);
+                self.reqwest_builder = self.reqwest_builder.basic_auth(uname, self.config.password);
             },
             None => {}
         };
-        return self
-    }
-
-    fn headers(mut self, header_map: Option<HeaderMap>) -> Self {
-        match header_map {
+        match self.config.headers {
             Some(h) => {
                 self.reqwest_builder = self.reqwest_builder.headers(h);
             }
             None => {}
         }
-        return self
-    }
-
-    pub fn parse(&self) -> Result<RequestConfig, &'static str> {
-        let mut header_map = HeaderMap::new();
-        let mut req_config = RequestConfig { headers: None, username: None, password: None };
-        for (key, value) in &self.data {
-            match key.as_str() {
-                "username" => {
-                    req_config.username = match handle_unique_argument(&value) {
-                        Ok(val) => Some(val.to_owned()),
-                        Err(e) => return Err(e)
-                    }
-                },
-                "password" => {
-                    req_config.password = match handle_unique_argument(&value) {
-                        Ok(val) => Some(val.to_owned()),
-                        Err(e) => return Err(e)
-                    }
-                },
-                other => {
-                    if other.starts_with("header") {
-                        for subval in value {
-                            let splt = other.splitn(2, "-").collect::<Vec<&str>>();
-                            if splt.len() < 2 {
-                                return Err("Invalid header")
-                            }
-                            header_map.insert(HeaderName::from_lowercase(splt[1].as_bytes()).unwrap(), HeaderValue::from_str(subval.as_str()).unwrap());
-                        }
-                    }
-                }
-            }
-        }
-        req_config.headers = Some(header_map);
-        return Ok(req_config)
-    }
-
-    pub fn build_request(self, config: RequestConfig) -> RequestBuilder{
-        self.basic_auth((config.username, config.password)).headers(config.headers).reqwest_builder
+        self.reqwest_builder
     }
 }

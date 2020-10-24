@@ -5,25 +5,10 @@ use reqwest::header::HeaderMap;
 use std::cmp::Ordering;
 
 pub mod parser;
+pub mod cmd;
 
 #[cfg(test)]
 mod tests;
-
-fn split_key_value<'a>(string: &'a str) -> Option<(&'a str, &'a str)> {
-    let splt = string.splitn(2, "=").collect::<Vec<&str>>();
-    if splt.len() < 2 {
-        return None
-    }
-    return Some((splt[0], splt[1]))
-}
-
-fn handle_unique_argument<'a>(values: &'a Vec<String>) -> Result<&'a str, &'static str> {
-    match 1.cmp(&values.len()) {
-        Ordering::Less => Err("No value provided"),
-        Ordering::Equal => Ok(values[0].as_str()),
-        Ordering::Greater => Err("More than one value provided")
-    }
-}
 
 pub enum Method {
     GET,
@@ -33,6 +18,7 @@ pub enum Method {
 
 pub struct RequestConfig {
     pub headers: Option<HeaderMap>,
+    pub params: Option<Vec<(String, String)>>,
     pub auth: Option<(String, Option<String>)>,
     pub bearer: Option<String>,
     pub json: Option<String>,
@@ -41,15 +27,19 @@ pub struct RequestConfig {
 
 impl RequestConfig {
     pub fn new() -> RequestConfig {
-        RequestConfig {headers: None, auth: None, bearer: None, json: None, body: None}
+        RequestConfig {
+            headers: None,
+            auth: None,
+            bearer: None,
+            json: None,
+            body: None,
+            params: None
+        }
     }
 }
 
 pub struct RequestParser {
-    method: Method,
-    url: String,
     config: RequestConfig,
-    reqwest_client: Client,
     reqwest_builder: RequestBuilder
 }
 
@@ -61,7 +51,7 @@ impl RequestParser {
             Method::POST => client.post(url.as_str()),
             Method::PUT => client.put(url.as_str())
         };
-        RequestParser {method: method, url: url, config: config, reqwest_client: client, reqwest_builder: req_builder }
+        RequestParser {config: config, reqwest_builder: req_builder}
     }
 
     pub fn build_request(mut self) -> RequestBuilder{

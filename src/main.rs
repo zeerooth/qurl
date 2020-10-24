@@ -2,8 +2,8 @@ use std::process;
 use qurl::Method;
 use qurl::RequestParser;
 use qurl::RequestConfig;
-use qurl::parser::{cmd_header_parser, delimiter_parser};
-use clap::{App, Arg, ArgGroup};
+use qurl::parser::{delimiter_parser};
+use qurl::cmd::app_matches;
 use colored::*;
 use reqwest::header::{HeaderName, HeaderMap, HeaderValue};
 
@@ -12,80 +12,7 @@ use std::collections::HashMap;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create application like normal
-    let matches = App::new("qurl")
-        .about("A fast command-line HTTP request utility written in Rust")
-        .arg(
-            Arg::new("method")
-                .about("HTTP request method")
-                .index(1)
-                .possible_values(&["get", "post", "put"])
-                .required(true)
-        )
-        .arg(
-            Arg::new("url")
-                .about("target url")
-                .index(2)
-                .required(true)
-        )
-        .arg(
-            Arg::new("header")
-                .about("add a header")
-                .takes_value(true)
-                .short('H')
-                .long("header")
-                .required(false)
-                .multiple(true)
-                .validator(cmd_header_parser)
-        )
-        .arg(
-            Arg::new("username")
-                .about("basic auth username")
-                .takes_value(true)
-                .short('u')
-                .long("username")
-                .required(false)
-        )
-        .arg(
-            Arg::new("password")
-                .about("basic auth password")
-                .takes_value(true)
-                .short('p')
-                .long("password")
-                .required(false)
-                .requires("username")
-        )
-        .arg(
-            Arg::new("bearer")
-                .about("bearer auth token")
-                .takes_value(true)
-                .short('b')
-                .long("bearer")
-                .required(false)
-        )
-        .arg(
-            Arg::new("body")
-                .about("request body")
-                .takes_value(true)
-                .short('B')
-                .long("body")
-                .required(false)
-        )
-        .arg(
-            Arg::new("json")
-                .about("json data")
-                .takes_value(true)
-                .short('J')
-                .long("json")
-                .required(false)
-        )
-        .arg(
-            Arg::new("verbose")
-                .about("verbose output")
-                .short('v')
-                .long("verbose")
-                .required(false)
-        )
-        .get_matches();
+    let matches = app_matches();
     let verbose = matches.is_present("verbose");
     let request = parse_arguments(&matches).unwrap_or_else(|err| {
         eprintln!("{}: {} {}", "error".bright_red(), "Problem parsing arguments:", err);

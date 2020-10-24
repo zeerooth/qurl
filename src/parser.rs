@@ -13,3 +13,10 @@ pub fn cmd_header_parser(val: &str) -> Result<(), String> {
         Err(err) => Err(format!("Header: {}", err).to_string()) 
     }
 }
+
+pub fn cmd_param_parser(val: &str) -> Result<(), String> {
+    match delimiter_parser(val, "=") {
+        Ok(_res) => Ok(()),
+        Err(err) => Err(format!("Querystring parameter: {}", err).to_string()) 
+    }
+}

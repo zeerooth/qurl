@@ -1,8 +1,11 @@
 use std::process;
 use qurl::Method;
 use qurl::RequestParser;
-use qurl::RequestConfig;
-use qurl::parser::{delimiter_parser};
+use qurl::parser::delimiter_parser;
+use qurl::types::{Configurable, FromValues};
+use qurl::types::data::{Body, Json};
+use qurl::types::multivalue::Headers;
+use qurl::types::auth::BasicAuth;
 use qurl::cmd::app_matches;
 use colored::*;
 use reqwest::header::{HeaderName, HeaderMap, HeaderValue};
@@ -41,32 +44,22 @@ fn parse_arguments(matches: &clap::ArgMatches) -> Result<RequestParser, String> 
         Some(arg) => arg,
         None => return Err(String::from("No url provided"))
     };
-    let mut config = RequestConfig::new();
+    let mut config: Vec<Box<dyn Configurable>> = Vec::new();
     if let Some(headers) = matches.values_of("header") {
-        let mut header_map = HeaderMap::new();
-        for header in headers {
-            match delimiter_parser(header, ":") {
-                Ok(parsed) => { 
-                    let header_name = match HeaderName::from_bytes(parsed.0.as_bytes()) {
-                        Ok(h) => h,
-                        Err(_err) => { return Err(format!("Invalid header name: '{}'", parsed.0)) }
-                    };
-                    header_map.insert(header_name, HeaderValue::from_str(parsed.1).unwrap()); 
-                },
-                Err(_msg) => {}
-            }
+        match Headers::from_values(headers) {
+            Ok(obj) => config.push(Box::new(obj)),
+            Err(err) => return Err(err)
         }
-        config.headers = Some(header_map);
     }
     if let Some(username) = matches.value_of("username") {
         let password = matches.value_of("password");
-        config.auth = Some((username.to_owned(), password.map(str::to_string)));
+        config.push(Box::new(BasicAuth::from((username, password))));
     }
     if let Some(body) = matches.value_of("body") {
-        config.body = Some(body.to_owned());
+        config.push(Box::new(Body{ body: body.to_owned() }));
     }
     if let Some(json) = matches.value_of("json") {
-        config.body = Some(json.to_owned());
+        config.push(Box::new(Json{ json: json.to_owned() }));
     }
     Ok(RequestParser::new(method, url.to_owned(), config))
 }

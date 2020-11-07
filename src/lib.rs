@@ -1,42 +1,61 @@
 use std::collections::HashMap;
 use reqwest::Response;
-use reqwest::{Client, RequestBuilder};
+use reqwest::{Client, RequestBuilder, ClientBuilder};
 use reqwest::header::HeaderMap;
-use types::Configurable;
 use std::cmp::Ordering;
+use types::auth::BasicAuth;
+use types::ConfiguresBuilder;
+use clap::{Values, ArgMatches};
+use std::future::Future;
+use error::{ParsingError, ErrorWrapper};
 
 pub mod parser;
 pub mod cmd;
 pub mod types;
+pub mod error;
 
 #[cfg(test)]
 mod tests;
 
-pub enum Method {
-    GET,
-    POST,
-    PUT
-}
+#[derive(Debug)]
 pub struct RequestParser {
-    config: Vec<Box<dyn Configurable>>,
-    reqwest_builder: RequestBuilder
+    request_builder: RequestBuilder
 }
 
 impl RequestParser {
-    pub fn new(method: Method, url: String, config: Vec<Box<dyn Configurable>>) -> RequestParser {
-        let client = Client::new();
-        let reqwest_builder = match method {
-            Method::GET => client.get(url.as_str()),
-            Method::POST => client.post(url.as_str()),
-            Method::PUT => client.put(url.as_str())
-        };
-        RequestParser {config, reqwest_builder}
+    pub fn new(matches: ArgMatches) -> Result<RequestParser, ErrorWrapper> {
+        let client = RequestParser::configure_client(&matches)?;
+        let request_builder = RequestParser::configure_builder(client, &matches)?;
+        Ok(RequestParser {request_builder})
     }
 
-    pub fn build_request(mut self) -> RequestBuilder{
-        for config_element in self.config {
-            self.reqwest_builder = config_element.modify_builder(self.reqwest_builder);
+    pub fn configure_client(matches: &ArgMatches) -> Result<Client, ErrorWrapper> {
+        let client_builder = ClientBuilder::new();
+        let built = client_builder.build()?;
+        Ok(built)
+    }
+
+    pub fn configure_builder(client: Client, matches: &ArgMatches) -> Result<RequestBuilder, ErrorWrapper> {
+        let url = match matches.value_of("url") {
+            Some(url) => url,
+            None => return Err(ParsingError::new("no url provided").into())
         };
-        self.reqwest_builder
+        let mut req_builder = match matches.value_of("method") {
+            Some("get") => client.get(url),
+            Some(other) => return Err(ParsingError::new(format!("invalid method '{}'", other).as_str()).into()),
+            None => return Err(ParsingError::new("No method provided").into())
+        };
+        if let Some(username) = matches.value_of("username") {
+            let password = matches.value_of("password");
+            req_builder = BasicAuth::modify_builder(req_builder, (username, password))?;
+        }
+        Ok(req_builder)
+    }
+
+    pub async fn send(self) -> Result<Response, String> {
+        match self.request_builder.send().await {
+            Ok(response) => Ok(response),
+            Err(err) => Err(format!("Error sending request: {}", err))
+        }
     }
 }

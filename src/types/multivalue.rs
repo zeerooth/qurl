@@ -1,8 +1,8 @@
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use reqwest::RequestBuilder;
 use super::super::parser::delimiter_parser;
-use super::{Configurable, FromValues};
-use clap::Values;
+use super::ConfiguresBuilder;
+use crate::error::{ErrorWrapper, ParsingError};
 
 pub struct Headers {
     header_map: HeaderMap
@@ -12,27 +12,18 @@ pub struct FormData {
     data: Vec<(String, String)>
 }
 
-impl FromValues for Headers {
-    fn from_values(values: Values) -> Result<Self, String> {
+impl ConfiguresBuilder<Vec<&str>> for Headers {
+    fn modify_builder(reqwest_builder: RequestBuilder, value: Vec<&str>) -> Result<RequestBuilder, ErrorWrapper> {
         let mut header_map = HeaderMap::new();
-        for header in values {
+        for header in value {
             match delimiter_parser(header, ":") {
                 Ok(parsed) => { 
-                    let header_name = match HeaderName::from_bytes(parsed.0.as_bytes()) {
-                        Ok(h) => h,
-                        Err(_err) => { return Err(format!("Invalid header name: '{}'", parsed.0)) }
-                    };
-                    header_map.insert(header_name, HeaderValue::from_str(parsed.1).unwrap()); 
+                    let header_name = HeaderName::from_bytes(parsed.0.as_bytes())?;
+                    header_map.insert(header_name, HeaderValue::from_str(parsed.1)?); 
                 },
-                Err(msg) => return Err(format!("Couldn't parse header '{}': '{}'", header, msg))
+                Err(err) => return Err(ParsingError::new(format!("parsing headers failed: {}", err).as_str()).into())
             }
         }
-        Ok(Self{ header_map })
-    }
-}
-
-impl Configurable for Headers {
-    fn modify_builder(&self, reqwest_builder: RequestBuilder) -> RequestBuilder {
-        reqwest_builder.headers(self.header_map.to_owned())
+        Ok(reqwest_builder.headers(header_map))
     }
 }

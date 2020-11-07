@@ -1,14 +1,17 @@
-use reqwest::RequestBuilder;
+use reqwest::{RequestBuilder, Client};
 use clap::Values;
+use super::error::ErrorWrapper;
+use std::ops::Index;
+use std::fmt::Display;
 
 pub mod data;
 pub mod multivalue;
 pub mod auth;
 
-pub trait Configurable {
-    fn modify_builder(&self, reqwest_builder: RequestBuilder) -> RequestBuilder;
+pub trait ConfiguresBuilder<T> {
+    fn modify_builder(reqwest_builder: RequestBuilder, value: T) -> Result<RequestBuilder, ErrorWrapper>;
 }
 
-pub trait FromValues: Sized {
-    fn from_values(values: Values) -> Result<Self, String>;
-}
+pub trait ConfiguresClient<T> {
+    fn modify_client(reqwest_client: Client, value: T) -> Result<Client, ErrorWrapper>;
+} 

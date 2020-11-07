@@ -1,19 +1,12 @@
 use reqwest::RequestBuilder;
-use super::Configurable;
+use std::ops::Index;
+use super::ConfiguresBuilder;
+use crate::error::ErrorWrapper;
 
-pub struct BasicAuth {
-    pub username: String,
-    pub password: Option<String>
-}
+pub struct BasicAuth;
 
-impl From<(&str, Option<&str>)> for BasicAuth {
-    fn from(auth: (&str, Option<&str>)) -> Self {
-        BasicAuth{ username: auth.0.to_owned(), password: auth.1.map(str::to_string) }
-    }
-}
-
-impl Configurable for BasicAuth {
-    fn modify_builder(&self, reqwest_builder: RequestBuilder) -> RequestBuilder {
-        reqwest_builder.basic_auth(&self.username, self.password.as_ref())
+impl ConfiguresBuilder<(&str, Option<&str>)> for BasicAuth {
+    fn modify_builder(reqwest_builder: RequestBuilder, value: (&str, Option<&str>)) -> Result<RequestBuilder, ErrorWrapper> {
+        Ok(reqwest_builder.basic_auth(value.0, value.1))
     }
 }

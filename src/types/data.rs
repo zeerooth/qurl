@@ -1,38 +1,20 @@
-use std::str::FromStr;
 use reqwest::RequestBuilder;
-use super::Configurable;
+use super::ConfiguresBuilder;
+use crate::error::ErrorWrapper;
 
-pub struct Body {
-    pub body: String
-}
+pub struct Body;
 
-pub struct Json {
-    pub json: String
-}
+pub struct Json;
 
-impl FromStr for Body {
-    type Err = String;
-    fn from_str(val: &str) -> Result<Self, Self::Err> {
-        Ok(Self { body: val.to_owned() })
+impl ConfiguresBuilder<String> for Body {
+    fn modify_builder(reqwest_builder: RequestBuilder, value: String) -> Result<RequestBuilder, ErrorWrapper> {
+        Ok(reqwest_builder.body(value.to_string()))
     }
 }
 
-impl FromStr for Json {
-    type Err = String;
-    fn from_str(val: &str) -> Result<Self, Self::Err> {
-        Ok(Self { json: val.to_owned() })
-    }
-}
-
-impl Configurable for Body {
-    fn modify_builder(&self, reqwest_builder: RequestBuilder) -> RequestBuilder {
-        reqwest_builder.body(self.body.to_string())
-    }
-}
-
-impl Configurable for Json {
-    fn modify_builder(&self, reqwest_builder: RequestBuilder) -> RequestBuilder {
-        reqwest_builder.json(&self.json)
+impl ConfiguresBuilder<String> for Json {
+    fn modify_builder(reqwest_builder: RequestBuilder, value: String) -> Result<RequestBuilder, ErrorWrapper> {
+        Ok(reqwest_builder.json(&value))
     }
 }
 

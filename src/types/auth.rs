@@ -1,12 +1,13 @@
 use reqwest::RequestBuilder;
-use std::ops::Index;
 use super::ConfiguresBuilder;
 use crate::error::ErrorWrapper;
+use crate::parser::delimiter_parser;
 
 pub struct BasicAuth;
 
-impl ConfiguresBuilder<(&str, Option<&str>)> for BasicAuth {
-    fn modify_builder(reqwest_builder: RequestBuilder, value: (&str, Option<&str>)) -> Result<RequestBuilder, ErrorWrapper> {
-        Ok(reqwest_builder.basic_auth(value.0, value.1))
+impl ConfiguresBuilder<&str> for BasicAuth {
+    fn modify_builder(request_builder: RequestBuilder, value: &str) -> Result<RequestBuilder, ErrorWrapper> {
+        let auth = delimiter_parser(value, ":")?;
+        Ok(request_builder.basic_auth(auth.0, Some(auth.1)))
     }
 }

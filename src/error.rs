@@ -18,29 +18,11 @@ impl<T: Error + 'static> std::convert::From<T> for ErrorWrapper {
     }
 }
 
-// impl std::convert::From<reqwest::Error> for ErrorWrapper {
-//     fn from(error: reqwest::Error) -> Self {
-//         Self{ inner: Box::new(error) }
-//     }
-// }
-
-// impl std::convert::From<reqwest::header::InvalidHeaderName> for ErrorWrapper {
-//     fn from(error: reqwest::header::InvalidHeaderName) -> Self {
-//         Self{ inner: Box::new(error) }
-//     }
-// }
-
-// impl std::convert::From<reqwest::header::InvalidHeaderValue> for ErrorWrapper {
-//     fn from(error: reqwest::header::InvalidHeaderValue) -> Self {
-//         Self{ inner: Box::new(error) }
-//     }
-// }
-
-// impl std::convert::From<ParsingError> for ErrorWrapper {
-//     fn from(error: ParsingError) -> Self {
-//         Self{ inner: Box::new(error) }
-//     }
-// }
+impl ErrorWrapper {
+    pub fn inner(self) -> Box<dyn Error> {
+        self.inner
+    }
+}
 
 #[derive(Debug)]
 pub struct ParsingError {

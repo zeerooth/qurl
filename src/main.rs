@@ -1,4 +1,3 @@
-use std::process;
 use qurl::RequestParser;
 use qurl::cmd::app_matches;
 use colored::*;
@@ -9,7 +8,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = app_matches();
     let verbose = matches.is_present("verbose");
     let built_request = match RequestParser::new(matches) {
-        Ok(req_parser) => req_parser
+        Ok(req_parser) => req_parser,
+        Err(err) => return Err(err.inner())
     };
     if verbose { println!("{}\n{:#?}", "[DEBUG] Making a request:".green(), built_request); }
     let response = built_request.send().await?;

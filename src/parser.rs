@@ -3,12 +3,9 @@ use super::error::{ParsingError, ErrorWrapper};
 pub fn delimiter_parser<'a>(val: &'a str, delimiter: &str) -> Result<(&'a str, &'a str), ParsingError> {
     if val.contains(delimiter) {
         let splt = val.splitn(2, delimiter).collect::<Vec<&str>>();
-        if splt[0].len() == 0 {
-            return Err(ParsingError::new("provided empty key"))
-        }
         return Ok((splt[0], splt[1]))
     } else {
-        Err(ParsingError::new(format!("value must be delimited by '{}'", delimiter).as_str()))
+        Err(ParsingError::new(format!("couldn't parse '{}': it must be delimited by '{}'", val, delimiter).as_str()))
     }
 }
 

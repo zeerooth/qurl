@@ -1,12 +1,10 @@
-use std::collections::HashMap;
 use reqwest::Response;
 use reqwest::{Client, RequestBuilder, ClientBuilder};
-use reqwest::header::HeaderMap;
-use std::cmp::Ordering;
-use types::auth::BasicAuth;
+use types::auth::{BasicAuth};
+use types::data::Json;
+use types::multivalue::Headers;
 use types::ConfiguresBuilder;
-use clap::{Values, ArgMatches};
-use std::future::Future;
+use clap::{ArgMatches};
 use error::{ParsingError, ErrorWrapper};
 
 pub mod parser;
@@ -45,9 +43,14 @@ impl RequestParser {
             Some(other) => return Err(ParsingError::new(format!("invalid method '{}'", other).as_str()).into()),
             None => return Err(ParsingError::new("No method provided").into())
         };
-        if let Some(username) = matches.value_of("username") {
-            let password = matches.value_of("password");
-            req_builder = BasicAuth::modify_builder(req_builder, (username, password))?;
+        if let Some(basic_auth) = matches.value_of("basic-auth") {
+            req_builder = BasicAuth::modify_builder(req_builder, basic_auth)?;
+        }
+        if let Some(json) = matches.value_of("json") {
+            req_builder = Json::modify_builder(req_builder, json)?;
+        }
+        if let Some(headers) = matches.values_of("headers") {
+            req_builder = Headers::modify_builder(req_builder, headers)?;
         }
         Ok(req_builder)
     }

@@ -1,5 +1,7 @@
 use clap::{App, Arg, ArgMatches};
-use super::parser::{cmd_header_parser, cmd_param_parser};
+use super::parser::{cmd_colon_kv_parser, cmd_param_parser};
+use crate::types::auth::BasicAuth;
+use crate::types::ProvidesCLIArguments;
 
 pub fn app_matches() -> ArgMatches {
     App::new("qurl")
@@ -25,15 +27,10 @@ pub fn app_matches() -> ArgMatches {
                 .long("header")
                 .required(false)
                 .multiple(true)
-                .validator(cmd_header_parser)
+                .validator(cmd_colon_kv_parser)
         )
-        .arg(
-            Arg::new("basic-auth")
-                .about("basic auth")
-                .takes_value(true)
-                .short('a')
-                .long("basic-auth")
-                .required(false)
+        .args(
+            BasicAuth::provide_arguments()
         )
         .arg(
             Arg::new("bearer")

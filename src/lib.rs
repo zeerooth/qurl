@@ -1,8 +1,8 @@
 use reqwest::Response;
 use reqwest::{Client, RequestBuilder, ClientBuilder};
 use types::auth::{BasicAuth};
-use types::data::Json;
-use types::multivalue::Headers;
+use types::data::{Json, Body};
+use types::headers::Headers;
 use types::ConfiguresBuilder;
 use clap::{ArgMatches};
 use error::{ParsingError, ErrorWrapper};
@@ -43,15 +43,10 @@ impl RequestParser {
             Some(other) => return Err(ParsingError::new(format!("invalid method '{}'", other).as_str()).into()),
             None => return Err(ParsingError::new("No method provided").into())
         };
-        if let Some(basic_auth) = matches.value_of("basic-auth") {
-            req_builder = BasicAuth::modify_builder(req_builder, basic_auth)?;
-        }
-        if let Some(json) = matches.value_of("json") {
-            req_builder = Json::modify_builder(req_builder, json)?;
-        }
-        if let Some(headers) = matches.values_of("headers") {
-            req_builder = Headers::modify_builder(req_builder, headers)?;
-        }
+        req_builder = BasicAuth::build(req_builder, matches)?;
+        req_builder = Body::build(req_builder, matches)?;
+        req_builder = Json::build(req_builder, matches)?;
+        req_builder = Headers::build(req_builder, matches)?;
         Ok(req_builder)
     }
 

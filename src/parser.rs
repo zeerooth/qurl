@@ -9,7 +9,7 @@ pub fn delimiter_parser<'a>(val: &'a str, delimiter: &str) -> Result<(&'a str, &
     }
 }
 
-pub fn cmd_header_parser(val: &str) -> Result<(), ErrorWrapper> {
+pub fn cmd_colon_kv_parser(val: &str) -> Result<(), ErrorWrapper> {
     match delimiter_parser(val, ":") {
         Ok(_res) => Ok(()),
         Err(err) => Err(ParsingError::new(format!("parsing header failed: {}", err).as_str()).into()) 

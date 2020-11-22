@@ -1,16 +1,22 @@
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use reqwest::RequestBuilder;
-use clap::Values;
+use clap::{Values, ArgMatches};
 use super::super::parser::delimiter_parser;
 use super::ConfiguresBuilder;
 use crate::error::{ErrorWrapper, ParsingError};
 
 pub struct Headers;
 
-pub struct FormData;
+impl<'a> ConfiguresBuilder<'a, Values<'a>, HeaderMap> for Headers {
+    fn modify_builder(request_builder: RequestBuilder, value: HeaderMap) -> Result<RequestBuilder, ErrorWrapper> {
+        Ok(request_builder.headers(value))
+    }
 
-impl<'a> ConfiguresBuilder<Values<'a>> for Headers {
-    fn modify_builder(request_builder: RequestBuilder, value: Values<'a>) -> Result<RequestBuilder, ErrorWrapper> {
+    fn get_value(matches: &'a ArgMatches) -> Option<Values> {
+        matches.values_of("header")
+    }
+
+    fn process_value(value: Values) -> Result<HeaderMap, ErrorWrapper> {
         let mut header_map = HeaderMap::new();
         for header in value {
             match delimiter_parser(header, ":") {
@@ -21,6 +27,6 @@ impl<'a> ConfiguresBuilder<Values<'a>> for Headers {
                 Err(err) => return Err(ParsingError::new(format!("parsing headers failed: {}", err).as_str()).into())
             }
         }
-        Ok(request_builder.headers(header_map))
+        Ok(header_map)
     }
 }

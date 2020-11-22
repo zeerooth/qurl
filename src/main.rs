@@ -1,5 +1,5 @@
 use qurl::RequestParser;
-use qurl::cmd::app_matches;
+use qurl::cli::app_matches;
 use colored::*;
 
 #[tokio::main]

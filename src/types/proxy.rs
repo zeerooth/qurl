@@ -1,6 +1,6 @@
 use reqwest::{ClientBuilder, Proxy as ReqwestProxy};
-use clap::ArgMatches;
-use super::ConfiguresClient;
+use clap::{ArgMatches, Arg};
+use super::{ConfiguresClient, ProvidesCLIArguments};
 use crate::error::ErrorWrapper;
 use crate::parser::delimiter_parser;
 
@@ -31,5 +31,24 @@ impl<'a> ConfiguresClient<'a, ProxyData<'a>, ReqwestProxy> for Proxy {
             proxy = proxy.basic_auth(auth.0, auth.1);
         };
         Ok(proxy)
+    }
+}
+
+impl ProvidesCLIArguments for Proxy {
+    fn provide_arguments() -> Vec<Arg<'static>> {
+        vec![
+            Arg::new("proxy")
+                .about("url for the proxy")
+                .takes_value(true)
+                .short('P')
+                .long("proxy")
+                .required(false),
+            Arg::new("proxy-auth")
+                .about("proxy basic auth")
+                .takes_value(true)
+                .short('A')
+                .long("proxy-auth")
+                .required(false)
+        ]
     }
 }

@@ -2,13 +2,14 @@ use reqwest::Response;
 use reqwest::{Client, RequestBuilder, ClientBuilder};
 use types::auth::{BasicAuth};
 use types::data::{Json, Body};
+use types::proxy::Proxy;
 use types::headers::Headers;
-use types::ConfiguresBuilder;
+use types::{ConfiguresBuilder, ConfiguresClient};
 use clap::{ArgMatches};
 use error::{ParsingError, ErrorWrapper};
 
 pub mod parser;
-pub mod cmd;
+pub mod cli;
 pub mod types;
 pub mod error;
 
@@ -28,9 +29,9 @@ impl RequestParser {
     }
 
     pub fn configure_client(matches: &ArgMatches) -> Result<Client, ErrorWrapper> {
-        let client_builder = ClientBuilder::new();
-        let built = client_builder.build()?;
-        Ok(built)
+        let mut client_builder = ClientBuilder::new();
+        client_builder = Proxy::build(client_builder, matches)?;
+        Ok(client_builder.build()?)
     }
 
     pub fn configure_builder(client: Client, matches: &ArgMatches) -> Result<RequestBuilder, ErrorWrapper> {

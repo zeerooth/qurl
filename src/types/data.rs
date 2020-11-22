@@ -1,7 +1,7 @@
 use reqwest::RequestBuilder;
-use super::ConfiguresBuilder;
+use super::{ConfiguresBuilder, ProvidesCLIArguments};
 use crate::error::ErrorWrapper;
-use clap::ArgMatches;
+use clap::{ArgMatches, Arg};
 
 pub struct Body;
 
@@ -19,6 +19,19 @@ impl<'a> ConfiguresBuilder<'a, &'a str, &'a str> for Body {
     }
 }
 
+impl ProvidesCLIArguments for Body {
+    fn provide_arguments() -> Vec<Arg<'static>> {
+        vec![
+            Arg::new("body")
+                .about("request body")
+                .takes_value(true)
+                .short('B')
+                .long("body")
+                .required(false)
+        ]
+    }
+}
+
 pub struct Json;
 
 impl<'a> ConfiguresBuilder<'a, &'a str, &'a str> for Json {
@@ -32,6 +45,19 @@ impl<'a> ConfiguresBuilder<'a, &'a str, &'a str> for Json {
 
     fn process_value(value: &'a str) -> Result<&'a str, ErrorWrapper> {
         Ok(value)
+    }
+}
+
+impl ProvidesCLIArguments for Json {
+    fn provide_arguments() -> Vec<Arg<'static>> {
+        vec![
+            Arg::new("json")
+                .about("json data")
+                .takes_value(true)
+                .short('J')
+                .long("json")
+                .required(false)
+        ]
     }
 }
 

@@ -1,8 +1,8 @@
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use reqwest::RequestBuilder;
-use clap::{Values, ArgMatches};
-use super::super::parser::delimiter_parser;
-use super::ConfiguresBuilder;
+use clap::{Values, ArgMatches, Arg};
+use super::super::parser::{delimiter_parser, cmd_colon_kv_parser};
+use super::{ConfiguresBuilder, ProvidesCLIArguments};
 use crate::error::{ErrorWrapper, ParsingError};
 
 pub struct Headers;
@@ -28,5 +28,20 @@ impl<'a> ConfiguresBuilder<'a, Values<'a>, HeaderMap> for Headers {
             }
         }
         Ok(header_map)
+    }
+}
+
+impl ProvidesCLIArguments for Headers {
+    fn provide_arguments() -> Vec<Arg<'static>> {
+        vec![
+            Arg::new("header")
+                .about("add a header")
+                .takes_value(true)
+                .short('H')
+                .long("header")
+                .required(false)
+                .multiple(true)
+                .validator(cmd_colon_kv_parser)
+        ]
     }
 }

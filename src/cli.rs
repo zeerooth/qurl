@@ -1,11 +1,12 @@
 use clap::{App, Arg, ArgMatches};
-use super::parser::{cmd_param_parser};
 use crate::types::{
     auth::BasicAuth,
     data::Body,
     data::Json,
-    headers::Headers,
-    proxy::Proxy
+    multipart::Headers,
+    multipart::FormData,
+    proxy::Proxy,
+    redirect::RedirectPolicy
 };
 use crate::types::ProvidesCLIArguments;
 
@@ -33,10 +34,12 @@ pub fn app_matches() -> ArgMatches {
                 .required(false)
         )
         .args(Headers::provide_arguments())
+        .args(FormData::provide_arguments())
         .args(BasicAuth::provide_arguments())
         .args(Body::provide_arguments())
         .args(Json::provide_arguments())
         .args(Proxy::provide_arguments())
+        .args(RedirectPolicy::provide_arguments())
         .arg(
             Arg::new("param")
                 .about("querystring parameter")
@@ -45,7 +48,6 @@ pub fn app_matches() -> ArgMatches {
                 .short('q')
                 .long("param")
                 .required(false)
-                .validator(cmd_param_parser)
         )
         .arg(
             Arg::new("bearer")

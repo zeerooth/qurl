@@ -3,9 +3,10 @@ use super::error::ErrorWrapper;
 use clap::{Arg, ArgMatches};
 
 pub mod data;
-pub mod headers;
+pub mod multipart;
 pub mod auth;
 pub mod proxy;
+pub mod redirect;
 
 pub enum BuilderConfig {
     BaiscAuth(auth::BasicAuth)

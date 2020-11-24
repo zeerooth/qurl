@@ -60,5 +60,3 @@ impl ProvidesCLIArguments for Json {
         ]
     }
 }
-
-pub struct FormData;

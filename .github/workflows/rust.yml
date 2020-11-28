@@ -14,7 +14,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+          - os: macOS-latest
+            target: x86_64-apple-darwin
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -37,5 +43,5 @@ jobs:
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: target/release/qurl
-        asset_name: qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.os }}
+        asset_name: qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}
         tag: ${{ github.ref }}

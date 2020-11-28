@@ -38,13 +38,13 @@ impl ProvidesCLIArguments for Proxy {
     fn provide_arguments() -> Vec<Arg<'static>> {
         vec![
             Arg::new("proxy")
-                .about("url for the proxy")
+                .about("Url for the Proxy")
                 .takes_value(true)
-                .short('P')
+                .short('p')
                 .long("proxy")
                 .required(false),
             Arg::new("proxy-auth")
-                .about("proxy basic auth")
+                .about("Proxy Basic Authentication")
                 .takes_value(true)
                 .short('A')
                 .long("proxy-auth")

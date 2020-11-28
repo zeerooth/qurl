@@ -28,9 +28,9 @@ impl ProvidesCLIArguments for RedirectPolicy {
     fn provide_arguments() -> Vec<Arg<'static>> {
         vec![
             Arg::new("max-redirects")
-                .about("set the maximum number of redirects the program will follow (defaults to 10)")
+                .about("Set the maximum number of redirects the program will follow (defaults to 10)")
                 .takes_value(true)
-                .short('R')
+                .short('r')
                 .long("max-redirects")
                 .required(false)
         ]

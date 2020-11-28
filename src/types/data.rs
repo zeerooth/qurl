@@ -23,9 +23,9 @@ impl ProvidesCLIArguments for Body {
     fn provide_arguments() -> Vec<Arg<'static>> {
         vec![
             Arg::new("body")
-                .about("request body")
+                .about("Request Body")
                 .takes_value(true)
-                .short('B')
+                .short('b')
                 .long("body")
                 .required(false)
         ]
@@ -52,9 +52,9 @@ impl ProvidesCLIArguments for Json {
     fn provide_arguments() -> Vec<Arg<'static>> {
         vec![
             Arg::new("json")
-                .about("json data")
+                .about("Request's data as json")
                 .takes_value(true)
-                .short('J')
+                .short('j')
                 .long("json")
                 .required(false)
         ]

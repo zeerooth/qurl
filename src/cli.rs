@@ -5,30 +5,32 @@ use crate::types::{
     data::Json,
     multipart::Headers,
     multipart::FormData,
+    multipart::QueryString,
     proxy::Proxy,
-    redirect::RedirectPolicy
+    redirect::RedirectPolicy,
+    timeout::Timeout,
 };
 use crate::types::ProvidesCLIArguments;
 
 pub fn app_matches() -> ArgMatches {
-    App::new("qurl")
-        .about("A fast command-line HTTP request utility written in Rust")
+    App::new("qURL")
+        .about("Quick command-line HTTP request utility written in Rust")
         .arg(
             Arg::new("method")
                 .about("HTTP request method")
                 .index(1)
-                .possible_values(&["get", "post", "put"])
+                .possible_values(&["get", "post", "put", "head", "patch", "delete"])
                 .required(true)
         )
         .arg(
             Arg::new("url")
-                .about("target url")
+                .about("Target URL")
                 .index(2)
                 .required(true)
         )
         .arg(
             Arg::new("verbose")
-                .about("verbose output")
+                .about("Verbose output")
                 .short('v')
                 .long("verbose")
                 .required(false)
@@ -38,24 +40,9 @@ pub fn app_matches() -> ArgMatches {
         .args(BasicAuth::provide_arguments())
         .args(Body::provide_arguments())
         .args(Json::provide_arguments())
+        .args(QueryString::provide_arguments())
         .args(Proxy::provide_arguments())
         .args(RedirectPolicy::provide_arguments())
-        .arg(
-            Arg::new("param")
-                .about("querystring parameter")
-                .takes_value(true)
-                .multiple(true)
-                .short('q')
-                .long("param")
-                .required(false)
-        )
-        .arg(
-            Arg::new("bearer")
-                .about("bearer auth token")
-                .takes_value(true)
-                .short('b')
-                .long("bearer")
-                .required(false)
-        )
+        .args(Timeout::provide_arguments())
         .get_matches()
 }

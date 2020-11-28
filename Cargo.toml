@@ -3,13 +3,17 @@ name = "qurl"
 version = "0.1.0"
 authors = ["Radosław Stępień <rstepien@protonmail.com>"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+description = "Quick command-line HTTP request utility written in Rust"
+readme = "README.md"
+repository = "https://github.com/Zeerooth/qurl"
+license = "MIT"
+keywords = ["http", "cli", "curl"]
+categories = ["command-line-utilities", "api-bindings", "web-programming::http-client"]
 
 [dependencies]
 reqwest = { version = "^0.10", features = ["blocking", "json"] }
-tokio = { version = "0.2", features = ["full"] }
+tokio = { version = "0.2", features = ["macros"] }
 clap = "3.0.0-beta.2"
 colored = "2"
-regex = "1"
 rstest = "0.6"
+mockall = "0.8.0"

@@ -7,6 +7,7 @@ pub mod multipart;
 pub mod auth;
 pub mod proxy;
 pub mod redirect;
+pub mod timeout;
 
 pub enum BuilderConfig {
     BaiscAuth(auth::BasicAuth)

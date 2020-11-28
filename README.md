@@ -25,30 +25,30 @@ You can also head over to [releases tab](https://github.com/Zeerooth/qurl/releas
 
 Simplest GET request:
 
-.. code-block:: bash
-
+```bash
     $ qurl get https://httpbin.org/get
+```
 
 
 To enable verbose output and get more information about requests and responses, add ``-v`` flag (which will from now on be used in examples to provide some better understading about what's going on under the hood):
 
-.. code-block:: bash
-
+```bash
     $ qurl get https://httpbin.org/get -v
+```
 
 
-Let's add some headers (not that headers are **not** case-sensitive):
+Let's add some headers (note that headers are **not** case-sensitive):
 
-.. code-block:: bash
-
+```bash
     $ qurl get https://httpbin.org/get -v --header accept:application/json
+```
 
 
 What about posting some json data?:
 
-.. code-block:: bash
-
+```bash
     $ qurl post https://httpbin.org/post -v --json '{example:"json"}'
+```
 
 
 See ``qurl --help`` for more options.

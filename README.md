@@ -14,9 +14,9 @@ qURL is a long way from completion, it may be unstable, unsafe and lack many fea
 
 If you have cargo installed on your system:
 
-.. code-block:: bash
-
-    $ cargo install qurl
+```bash
+$ cargo install qurl
+```
 
 You can also head over to [releases tab](https://github.com/Zeerooth/qurl/releases/) and download the latest binary for your OS.
 
@@ -26,28 +26,28 @@ You can also head over to [releases tab](https://github.com/Zeerooth/qurl/releas
 Simplest GET request:
 
 ```bash
-    $ qurl get https://httpbin.org/get
+$ qurl get https://httpbin.org/get
 ```
 
 
 To enable verbose output and get more information about requests and responses, add ``-v`` flag (which will from now on be used in examples to provide some better understading about what's going on under the hood):
 
 ```bash
-    $ qurl get https://httpbin.org/get -v
+$ qurl get https://httpbin.org/get -v
 ```
 
 
 Let's add some headers (note that headers are **not** case-sensitive):
 
 ```bash
-    $ qurl get https://httpbin.org/get -v --header accept:application/json
+$ qurl get https://httpbin.org/get -v --header accept:application/json
 ```
 
 
 What about posting some json data?:
 
 ```bash
-    $ qurl post https://httpbin.org/post -v --json '{example:"json"}'
+$ qurl post https://httpbin.org/post -v --json '{example:"json"}'
 ```
 
 

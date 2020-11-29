@@ -1,0 +1,77 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+          - os: macOS-latest
+            target: x86_64-apple-darwin
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+
+    - name: Install stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+    - name: Set the version
+      id: version
+      run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
+
+    - name: Build
+      run: cargo build --release --locked
+
+    - name: Install cargo-tarpaulin
+      uses: actions-rs/install@v0.1
+      with:
+        crate: cargo-tarpaulin
+        version: latest
+        use-tool-cache: true
+
+    - name: Coverage with tarpaulin
+      run: cargo tarpaulin --all --all-features --timeout 600 --out coverage -- --test-threads 1
+
+    - name: Upload coverage
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: ./coverage.info
+
+    - name: Strip binary
+      if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
+      run: strip target/release/qurl
+
+    - name: Package
+      shell: bash
+      run: |
+        zip qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.zip
+        case ${{ matrix.job.target }} in
+          *-windows-*) 7z -y a 'qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.zip 'target/release/qurl' 'README.md' 'LICENSE' | tail -2 ;;
+          *) zip qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.zip 'target/release/qurl' 'README.md' 'LICENSE' ;;
+        esac;
+
+    - name: Upload binaries to release
+      uses: svenstaro/upload-release-action@v1-release
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.zip
+        asset_name: qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.zip
+        tag: ${{ github.ref }}

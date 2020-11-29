@@ -41,7 +41,8 @@ jobs:
     - name: Package
       shell: bash
       run: |
-        export EXE_suffix="" ; case ${{ matrix.job.target }} in *-pc-windows-*) EXE_suffix=".exe" ;; esac;
+        # package
+        EXE_suffix="" ; case ${{ matrix.target }} in *-pc-windows-*) EXE_suffix=".exe" ;; esac;
         cp target/release/qurl${{ EXE_suffix }} ./qurl${{ EXE_suffix }}
         case ${{ matrix.target }} in
           *-windows-*) 7z -y a 'qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.zip' 'qurl.exe' 'README.md' 'LICENSE' | tail -2 ;;

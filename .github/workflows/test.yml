@@ -1,0 +1,36 @@
+name: Test
+
+on: push
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+
+    - name: Build
+      run: cargo build --release --locked
+
+    - name: Install stable toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        override: true
+
+    - name: Run cargo-tarpaulin
+      uses: actions-rs/tarpaulin@v0.1
+      with:
+        version: '0.15.0'
+        args: '-- --out coverage --test-threads 1'
+
+    - name: Upload coverage
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: ./coverage.info

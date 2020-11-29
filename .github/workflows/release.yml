@@ -41,8 +41,8 @@ jobs:
       shell: bash
       run: |
         case ${{ matrix.target }} in
-          *-windows-*) 7z -y a 'qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.zip 'target/release/qurl' 'README.md' 'LICENSE' | tail -2 ;;
-          *) zip qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.zip 'target/release/qurl' 'README.md' 'LICENSE' ;;
+          *-windows-*) 7z -y a 'qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.zip' 'target/release/qurl.exe' 'README.md' 'LICENSE' | tail -2 ;;
+          *) zip 'qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.zip' 'target/release/qurl' 'README.md' 'LICENSE' ;;
         esac;
 
     - name: Upload binaries to release

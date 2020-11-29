@@ -26,12 +26,6 @@ jobs:
       with:
         fetch-depth: 1
 
-    - name: Install stable toolchain
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        override: true
-
     - name: Set the version
       id: version
       run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
@@ -39,15 +33,17 @@ jobs:
     - name: Build
       run: cargo build --release --locked
 
-    - name: Install cargo-tarpaulin
-      uses: actions-rs/install@v0.1
+    - name: Install stable toolchain
+      uses: actions-rs/toolchain@v1
       with:
-        crate: cargo-tarpaulin
-        version: latest
-        use-tool-cache: true
+        toolchain: stable
+        override: true
 
-    - name: Coverage with tarpaulin
-      run: cargo tarpaulin --all --all-features --timeout 600 --out coverage -- --test-threads 1
+    - name: Run cargo-tarpaulin
+      uses: actions-rs/tarpaulin@v0.1
+      with:
+        version: '0.15.0'
+        args: '-- --out coverage --test-threads 1'
 
     - name: Upload coverage
       uses: coverallsapp/github-action@master

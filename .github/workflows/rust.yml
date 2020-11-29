@@ -30,6 +30,14 @@ jobs:
     - name: Set the version
       id: version
       run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
+    
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        profile: minimal
+        override: true
+        target: ${{ matrix.target }}
 
     - name: Build
       run: cargo build --release --locked

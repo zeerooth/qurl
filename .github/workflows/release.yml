@@ -41,12 +41,9 @@ jobs:
     - name: Package
       shell: bash
       run: |
-        # package
-        EXE_suffix="" ; case ${{ matrix.target }} in *-pc-windows-*) EXE_suffix=".exe" ;; esac;
-        cp target/release/qurl${{ EXE_suffix }} ./qurl${{ EXE_suffix }}
         case ${{ matrix.target }} in
-          *-windows-*) 7z -y a 'qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.zip' 'qurl.exe' 'README.md' 'LICENSE' | tail -2 ;;
-          *) zip 'qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.zip' 'qurl' 'README.md' 'LICENSE' ;;
+          *-windows-*) cp target/release/qurl.exe ./qurl.exe; 7z -y a 'qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.zip' 'qurl.exe' 'README.md' 'LICENSE' | tail -2 ;;
+          *) cp target/release/qurl ./qurl; zip 'qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.zip' 'qurl' 'README.md' 'LICENSE' ;;
         esac;
 
     - name: Upload binaries to release

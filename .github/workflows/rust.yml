@@ -30,14 +30,6 @@ jobs:
     - name: Set the version
       id: version
       run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
-    
-    - name: Install Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        profile: minimal
-        override: true
-        target: ${{ matrix.target }}
 
     - name: Build
       run: cargo build --release --locked
@@ -46,10 +38,20 @@ jobs:
       if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
       run: strip target/release/qurl
 
-    - name: Upload binaries to release
+    - name: Upload binaries to release (Linux/MacOS)
       uses: svenstaro/upload-release-action@v1-release
+      if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: target/release/qurl
         asset_name: qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}
+        tag: ${{ github.ref }}
+    
+    - name: Upload binaries to release (Windows)
+      uses: svenstaro/upload-release-action@v1-release
+      if: matrix.os == 'windows-latest'
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: target/release/qurl.exe
+        asset_name: qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.exe
         tag: ${{ github.ref }}

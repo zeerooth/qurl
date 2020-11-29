@@ -10,14 +10,14 @@ pub trait PrettyPrint {
 impl PrettyPrint for RequestParser {
     fn prettify(&self) -> Result<String, Box<dyn std::error::Error>> {
         let mut f = String::new();
-        writeln!(f, "{}: {}", "Method".cyan(), self.request.method())?;
-        writeln!(f, "{}: {}", "URL".cyan(), self.request.url())?;
+        writeln!(f, "{}: {}", "Method".bright_blue(), self.request.method())?;
+        writeln!(f, "{}: {}", "URL".bright_blue(), self.request.url())?;
         if let Some(timeout) = self.request.timeout() {
-            writeln!(f, "{}: {} ms", "Timeout".cyan(), timeout.as_millis())?;
+            writeln!(f, "{}: {} ms", "Timeout".bright_blue(), timeout.as_millis())?;
         }
-        writeln!(f, "{}:", "Headers".cyan())?;
+        writeln!(f, "{}:", "Headers".bright_blue())?;
         for header in self.request.headers() {
-            writeln!(f, "{}{}: {}", " ".repeat(4), header.0.as_str().cyan(), header.1.to_str().unwrap())?;
+            writeln!(f, "{}{}: {}", " ".repeat(4), header.0.as_str().bright_blue(), header.1.to_str().unwrap())?;
         }
         Ok(f)
     }
@@ -40,13 +40,13 @@ impl PrettyPrint for Response {
             code=status_code_str,
             reason=self.status().canonical_reason().unwrap_or("")
         )?;
-        writeln!(f, "{}: {}", "Final URL".cyan(), self.url())?;
+        writeln!(f, "{}: {}", "Final URL".bright_blue(), self.url())?;
         if let Some(remote_addr) = self.remote_addr() {
-            writeln!(f, "{}: {}", "Remote IP Address".cyan(), remote_addr)?;
+            writeln!(f, "{}: {}", "Remote IP Address".bright_blue(), remote_addr)?;
         };
-        writeln!(f, "{}:", "Headers".cyan())?;
+        writeln!(f, "{}:", "Headers".bright_blue())?;
         for header in self.headers() {
-            writeln!(f, "{}{}: {}", " ".repeat(4), header.0.as_str().cyan(), header.1.to_str().unwrap())?;
+            writeln!(f, "{}{}: {}", " ".repeat(4), header.0.as_str().bright_blue(), header.1.to_str().unwrap())?;
         }
         Ok(f)
     }

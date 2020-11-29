@@ -1,4 +1,4 @@
-name: Rust
+name: Release
 
 on:
   push:
@@ -28,7 +28,8 @@ jobs:
 
     - name: Set the version
       id: version
-      run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
+      run: echo ::set-output name=VERSION::${GITHUB_REF#refs/*/}
+      shell: bash
 
     - name: Build
       run: cargo build --release --locked
@@ -37,20 +38,18 @@ jobs:
       if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
       run: strip target/release/qurl
 
-    - name: Upload binaries to release (Linux/MacOS)
+    - name: Package
+      shell: bash
+      run: |
+        case ${{ matrix.target }} in
+          *-windows-*) cp target/release/qurl.exe ./qurl.exe; 7z -y a 'qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.zip' 'qurl.exe' 'README.md' 'LICENSE' | tail -2 ;;
+          *) cp target/release/qurl ./qurl; zip 'qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.zip' 'qurl' 'README.md' 'LICENSE' ;;
+        esac;
+
+    - name: Upload binaries to release
       uses: svenstaro/upload-release-action@v1-release
-      if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: target/release/qurl
-        asset_name: qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}
-        tag: ${{ github.ref }}
-    
-    - name: Upload binaries to release (Windows)
-      uses: svenstaro/upload-release-action@v1-release
-      if: matrix.os == 'windows-latest'
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: target/release/qurl.exe
-        asset_name: qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.exe
+        file: qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.zip
+        asset_name: qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.zip
         tag: ${{ github.ref }}

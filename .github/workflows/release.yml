@@ -28,7 +28,8 @@ jobs:
 
     - name: Set the version
       id: version
-      run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
+      run: echo ::set-output name=VERSION::${GITHUB_REF#refs/*/}
+      shell: bash
 
     - name: Build
       run: cargo build --release --locked
@@ -40,9 +41,11 @@ jobs:
     - name: Package
       shell: bash
       run: |
+        EXE_suffix="" ; case ${{ matrix.job.target }} in *-pc-windows-*) EXE_suffix=".exe" ;; esac;
+        cp target/release/qurl${{ EXE_suffix }} ./qurl${{ EXE_suffix }}
         case ${{ matrix.target }} in
-          *-windows-*) 7z -y a 'qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.zip' 'target/release/qurl.exe' 'README.md' 'LICENSE' | tail -2 ;;
-          *) zip 'qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.zip' 'target/release/qurl' 'README.md' 'LICENSE' ;;
+          *-windows-*) 7z -y a 'qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.zip' 'qurl.exe' 'README.md' 'LICENSE' | tail -2 ;;
+          *) zip 'qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.zip' 'qurl' 'README.md' 'LICENSE' ;;
         esac;
 
     - name: Upload binaries to release

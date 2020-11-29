@@ -40,7 +40,6 @@ jobs:
     - name: Package
       shell: bash
       run: |
-        zip qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.zip
         case ${{ matrix.job.target }} in
           *-windows-*) 7z -y a 'qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.zip 'target/release/qurl' 'README.md' 'LICENSE' | tail -2 ;;
           *) zip qurl-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.zip 'target/release/qurl' 'README.md' 'LICENSE' ;;

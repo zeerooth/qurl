@@ -3,7 +3,7 @@
 [![Crates.io](https://img.shields.io/crates/v/qurl?style=flat-square)](https://crates.io/crates/qurl)
 [![Crates.io](https://img.shields.io/crates/d/qurl?style=flat-square)](https://crates.io/crates/qurl)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](https://github.com/clap-rs/clap/blob/master/LICENSE-MIT)
-[![Coverage Status](https://coveralls.io/repos/github/Zeerooth/qurl/badge.svg?branch=dev)](https://coveralls.io/github/Zeerooth/qurl?branch=dev)
+[![Coverage Status](https://coveralls.io/repos/github/Zeerooth/qurl/badge.svg?branch=main)](https://coveralls.io/github/Zeerooth/qurl?branch=main)
 
 Quick command-line HTTP request utility written in Rust.
 The goal of this project is to provide a secure, reliable and quick command-line utility utilising the features Rust language.

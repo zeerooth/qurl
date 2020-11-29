@@ -19,4 +19,6 @@ colored = "2"
 
 [dev-dependencies]
 rstest = "0.6"
-mockall = "0.8.0"
+mockall = "0.8"
+assert_cmd = "1.0"
+predicates = "1"

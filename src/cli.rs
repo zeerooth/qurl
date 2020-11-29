@@ -15,12 +15,14 @@ use crate::types::ProvidesCLIArguments;
 pub fn app_matches() -> ArgMatches {
     App::new("qURL")
         .about("Quick command-line HTTP request utility written in Rust")
+        .setting(clap::AppSettings::AllowMissingPositional)
         .arg(
             Arg::new("method")
                 .about("HTTP request method")
                 .index(1)
                 .possible_values(&["get", "post", "put", "head", "patch", "delete"])
-                .required(true)
+                .required(false)
+                .default_value("get")
         )
         .arg(
             Arg::new("url")

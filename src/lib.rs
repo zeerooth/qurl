@@ -67,7 +67,7 @@ impl RequestParser {
     pub async fn send(self) -> Result<Response, String> {
         match self.client.execute(self.request).await {
             Ok(response) => Ok(response),
-            Err(err) => Err(format!("Error sending request: {}", err))
+            Err(err) => Err(format!("{}", err))
         }
     }
 }

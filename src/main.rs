@@ -17,7 +17,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     if verbose { println!("{}\n{}", "Making a request:".green().bold(), built_request.prettify()?); }
     let response = built_request.send().await?;
     if verbose { println!("{}\n{}", "Received response:".green().bold(), response.prettify().unwrap()); }
-    println!("{}", response.text().await?);
-    if verbose { println!("{}", "Program finished successfully".green().bold()); }
+    print!("{}", response.text().await?);
+    if verbose { println!("{}", "\nProgram finished successfully".green().bold()); }
     Ok(())
 }

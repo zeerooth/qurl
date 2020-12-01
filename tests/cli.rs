@@ -110,9 +110,10 @@ fn mock_server_port() -> u16 {
             format!("http://127.0.0.1:{}/redirect", mock_server_port()),
             String::from("--max-redirects"),
             String::from("2"),
+            String::from("-v"),
         ],
         true,
-        predicate::str::similar("success")
+        predicate::str::is_match(r"Final URL: http://127.0.0.1:\d+/redirect2")?
     ),
     case(
         vec![

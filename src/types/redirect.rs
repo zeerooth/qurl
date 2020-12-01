@@ -5,6 +5,7 @@ use crate::error::{ErrorWrapper, ParsingError};
 use clap::{Arg, ArgMatches};
 
 pub struct RedirectPolicy;
+static REDIRECT_ARG: &str = "max-redirects";
 
 impl<'a> ConfiguresClient<'a, &'a str, Policy> for RedirectPolicy {
     fn modify_client(client_builder: ClientBuilder, value: Policy) -> Result<ClientBuilder, ErrorWrapper> {
@@ -12,7 +13,7 @@ impl<'a> ConfiguresClient<'a, &'a str, Policy> for RedirectPolicy {
     }
 
     fn get_value(matches: &'a ArgMatches) -> Option<&str> {
-        matches.value_of("max-redirects")
+        matches.value_of(REDIRECT_ARG)
     }
 
     fn process_value(value: &str) -> Result<Policy, ErrorWrapper> {
@@ -27,11 +28,11 @@ impl<'a> ConfiguresClient<'a, &'a str, Policy> for RedirectPolicy {
 impl ProvidesCLIArguments for RedirectPolicy {
     fn provide_arguments() -> Vec<Arg<'static>> {
         vec![
-            Arg::new("max-redirects")
+            Arg::new(REDIRECT_ARG)
                 .about("Set the maximum number of redirects the program will follow [default: 10]")
                 .takes_value(true)
                 .short('r')
-                .long("max-redirects")
+                .long(REDIRECT_ARG)
                 .required(false)
         ]
     }

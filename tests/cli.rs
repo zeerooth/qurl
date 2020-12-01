@@ -22,6 +22,12 @@ fn mock_server_port() -> u16 {
             .header("Authorization", "Basic dXNlcm5hbWU6cGFzc3dvcmQ=");
         then.status(200).header("Content-Type", "text/html").body("success");
     });
+    server.mock(|when, then| {
+        when.method(Method::PUT)
+            .path("/put")
+            .header("Authorization", "Bearer AaBbCcDdEeFfGg0987654321fFeEdDcCbBaA");
+        then.status(200).header("Content-Type", "text/html").body("success");
+    });
     server.mock(|when, then|{
         when.path("/redirect");
         then.temporary_redirect(format!("/redirect2"));
@@ -75,6 +81,16 @@ fn mock_server_port() -> u16 {
             format!("http://127.0.0.1:{}/post", mock_server_port()),
             String::from("--basic-auth"),
             String::from("username:password"),
+        ],
+        true,
+        predicate::str::similar("success")
+    ),
+    case(
+        vec![
+            String::from("put"),
+            format!("http://127.0.0.1:{}/put", mock_server_port()),
+            String::from("--bearer"),
+            String::from("AaBbCcDdEeFfGg0987654321fFeEdDcCbBaA"),
         ],
         true,
         predicate::str::similar("success")

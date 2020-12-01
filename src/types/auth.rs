@@ -36,3 +36,34 @@ impl ProvidesCLIArguments for BasicAuth {
         ]
     }
 }
+
+pub struct BearerAuth;
+static BEARER_ARG: &str = "bearer";
+
+impl<'a> ConfiguresBuilder<'a, &'a str, &'a str> for BearerAuth {
+    fn modify_builder(request_builder: RequestBuilder, value: &'a str) -> Result<RequestBuilder, ErrorWrapper> {
+        Ok(request_builder.bearer_auth(value))
+    }
+
+    fn get_value(matches: &'a ArgMatches) -> Option<&str> {
+        matches.value_of(BEARER_ARG)
+    }
+
+    fn process_value(value: &'a str) -> Result<&'a str, ErrorWrapper> {
+        Ok(value)
+    }
+}
+
+impl ProvidesCLIArguments for BearerAuth {
+    fn provide_arguments() -> Vec<Arg<'static>> {
+        vec![
+            Arg::new(BEARER_ARG)
+                .about("OAuth 2.0 Bearer Token")
+                .takes_value(true)
+                .short('B')
+                .long(BEARER_ARG)
+                .required(false)
+        ]
+    }
+}
+

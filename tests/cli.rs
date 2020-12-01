@@ -100,10 +100,11 @@ fn mock_server_port() -> u16 {
     ),
     case(
         vec![
-            String::from("delete"),
+            String::from("get"),
             format!("http://127.0.0.1:{}/get", mock_server_port()),
             String::from("--timeout"),
-            String::from("1"),
+            String::from("0"),
+            String::from("-v")
         ],
         false,
         predicate::str::contains("operation timed out")

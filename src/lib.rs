@@ -1,12 +1,14 @@
-use reqwest::Response;
-use reqwest::{Client, ClientBuilder, Request};
-use types::auth::{BasicAuth};
-use types::data::{Json, Body};
-use types::proxy::Proxy;
-use types::multipart::{Headers, FormData, QueryString};
-use types::redirect::RedirectPolicy;
-use types::timeout::Timeout;
-use types::{ConfiguresBuilder, ConfiguresClient};
+use reqwest::{Response, Client, ClientBuilder, Request};
+use types::{
+    auth::{BasicAuth, BearerAuth},
+    data::{Body, Json},
+    multipart::{Headers, FormData, QueryString},
+    proxy::Proxy,
+    redirect::RedirectPolicy,
+    timeout::Timeout,
+    ConfiguresClient,
+    ConfiguresBuilder
+};
 use clap::{ArgMatches};
 use error::{ParsingError, ErrorWrapper};
 use std::fmt::Display;
@@ -55,6 +57,7 @@ impl RequestParser {
             None => return Err(ParsingError::new("No method provided").into())
         };
         req_builder = BasicAuth::build(req_builder, matches)?;
+        req_builder = BearerAuth::build(req_builder, matches)?;
         req_builder = Body::build(req_builder, matches)?;
         req_builder = Json::build(req_builder, matches)?;
         req_builder = Headers::build(req_builder, matches)?;
@@ -67,7 +70,7 @@ impl RequestParser {
     pub async fn send(self) -> Result<Response, String> {
         match self.client.execute(self.request).await {
             Ok(response) => Ok(response),
-            Err(err) => Err(format!("Error sending request: {}", err))
+            Err(err) => Err(format!("{}", err))
         }
     }
 }

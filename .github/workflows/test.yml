@@ -14,9 +14,6 @@ jobs:
       with:
         fetch-depth: 1
 
-    - name: Build
-      run: cargo build --release --locked
-
     - name: Install stable toolchain
       uses: actions-rs/toolchain@v1
       with:

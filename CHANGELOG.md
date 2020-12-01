@@ -1,4 +1,4 @@
-## Unreleased
+## 0.2.0
 
 #### Fixes
 * Fixed handling of errors in main function

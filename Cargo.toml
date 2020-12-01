@@ -1,6 +1,6 @@
 [package]
 name = "qurl"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Radosław Stępień <rstepien@protonmail.com>"]
 edition = "2018"
 description = "Quick command-line HTTP request utility written in Rust"

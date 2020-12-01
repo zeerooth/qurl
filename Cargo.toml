@@ -9,7 +9,7 @@ repository = "https://github.com/Zeerooth/qurl"
 license = "MIT"
 keywords = ["http", "cli", "curl"]
 categories = ["command-line-utilities", "api-bindings", "web-programming::http-client"]
-exclude = ["tests"]
+exclude = ["tests", ".github"]
 
 [dependencies]
 reqwest = { version = "^0.10", features = ["blocking", "json"] }

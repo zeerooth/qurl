@@ -1,3 +1,13 @@
+## Unreleased
+
+#### Features
+* Allow custom methods
+* `--json-file <path>` allows for loading json data from file now
+
+#### Tests
+* Unit tests for error & types modules
+
+
 ## 0.2.0
 
 #### Fixes

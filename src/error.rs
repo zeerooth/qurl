@@ -26,7 +26,7 @@ impl ErrorWrapper {
 
 #[derive(Debug)]
 pub struct ParsingError {
-    pub info: String
+    info: String
 }
 
 impl Error for ParsingError {}

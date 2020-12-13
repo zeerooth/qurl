@@ -1,7 +1,7 @@
-use reqwest::{Response, Client, ClientBuilder, Request};
+use reqwest::{Response, Client, ClientBuilder, Request, Method};
 use types::{
     auth::{BasicAuth, BearerAuth},
-    data::{Body, Json},
+    data::{Body, Json, JsonFile},
     multipart::{Headers, FormData, QueryString},
     proxy::Proxy,
     redirect::RedirectPolicy,
@@ -19,6 +19,7 @@ pub mod cli;
 pub mod types;
 pub mod error;
 pub mod debug;
+pub mod io;
 
 #[derive(Debug)]
 pub struct RequestParser {
@@ -47,19 +48,14 @@ impl RequestParser {
             None => return Err(ParsingError::new("no url provided").into())
         };
         let mut req_builder = match matches.value_of("method") {
-            Some("get") => client.get(url),
-            Some("post") => client.post(url),
-            Some("put") => client.put(url),
-            Some("head") => client.head(url),
-            Some("patch") => client.patch(url),
-            Some("delete") => client.delete(url),
-            Some(other) => return Err(ParsingError::new(format!("invalid method '{}'", other).as_str()).into()),
+            Some(method) => client.request(Method::from_bytes(&method.as_bytes())?, url),
             None => return Err(ParsingError::new("No method provided").into())
         };
         req_builder = BasicAuth::build(req_builder, matches)?;
         req_builder = BearerAuth::build(req_builder, matches)?;
         req_builder = Body::build(req_builder, matches)?;
         req_builder = Json::build(req_builder, matches)?;
+        req_builder = JsonFile::build(req_builder, matches)?;
         req_builder = Headers::build(req_builder, matches)?;
         req_builder = FormData::build(req_builder, matches)?;
         req_builder = QueryString::build(req_builder, matches)?;

@@ -1,7 +1,7 @@
-use clap::{App, Arg, ArgMatches, crate_version};
+use clap::{App, Arg, crate_version};
 use crate::types::{
     auth::{BasicAuth, BearerAuth},
-    data::{Body, Json},
+    data::{Body, Json, JsonFile},
     multipart::{Headers, FormData, QueryString},
     proxy::Proxy,
     redirect::RedirectPolicy,
@@ -9,7 +9,7 @@ use crate::types::{
 };
 use crate::types::ProvidesCLIArguments;
 
-pub fn app_matches() -> ArgMatches {
+pub fn app() -> App<'static> {
     App::new("qURL")
         .about("Quick command-line HTTP request utility written in Rust")
         .setting(clap::AppSettings::AllowMissingPositional)
@@ -18,7 +18,6 @@ pub fn app_matches() -> ArgMatches {
             Arg::new("method")
                 .about("HTTP request method")
                 .index(1)
-                .possible_values(&["get", "post", "put", "head", "patch", "delete"])
                 .required(false)
                 .default_value("get")
         )
@@ -41,9 +40,9 @@ pub fn app_matches() -> ArgMatches {
         .args(BearerAuth::provide_arguments())
         .args(Body::provide_arguments())
         .args(Json::provide_arguments())
+        .args(JsonFile::provide_arguments())
         .args(FormData::provide_arguments())
         .args(Proxy::provide_arguments())
         .args(RedirectPolicy::provide_arguments())
         .args(Timeout::provide_arguments())
-        .get_matches()
 }

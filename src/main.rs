@@ -1,6 +1,6 @@
 use qurl::RequestParser;
 use qurl::debug::PrettyPrint;
-use qurl::cli::app_matches;
+use qurl::cli::app;
 use colored::*;
 
 #[tokio::main]
@@ -16,7 +16,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 async fn run_app() -> Result<(), Box<dyn std::error::Error>> {
-    let matches = app_matches();
+    let matches = app().get_matches();
     let verbose = matches.is_present("verbose");
     let built_request = match RequestParser::new(matches) {
         Ok(req_parser) => req_parser,

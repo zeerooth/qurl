@@ -36,6 +36,12 @@ fn mock_server_port() -> u16 {
         when.path("/redirect2");
         then.status(200).header("Content-Type", "text/html").body("success");
     });
+    server.mock(|when, then| {
+        when.method(Method::PATCH)
+            .path("/patch")
+            .body("Some spaced body text .,?!$%&#*");
+        then.status(200).header("Content-Type", "text/html").body("success");
+    });
     server.port()
 }
 
@@ -125,6 +131,16 @@ fn mock_server_port() -> u16 {
         ],
         false,
         predicate::str::contains("operation timed out")
+    ),
+    case(
+        vec![
+            String::from("patch"),
+            format!("http://127.0.0.1:{}/patch", mock_server_port()),
+            String::from("--body"),
+            String::from("Some spaced body text .,?!$%&#*"),
+        ],
+        true,
+        predicate::str::similar("success")
     ),
 )]
 fn test_commands<T: Predicate<str>>(args: Vec<String>, success: bool, text: T) -> Result<(), Box<dyn std::error::Error>> {

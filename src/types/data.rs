@@ -1,6 +1,7 @@
 use reqwest::RequestBuilder;
 use super::{ConfiguresBuilder, ProvidesCLIArguments};
 use crate::error::ErrorWrapper;
+use crate::io::handle_file;
 use clap::{ArgMatches, Arg};
 
 pub struct Body;
@@ -56,6 +57,36 @@ impl ProvidesCLIArguments for Json {
                 .takes_value(true)
                 .short('j')
                 .long("json")
+                .required(false)
+        ]
+    }
+}
+
+pub struct JsonFile;
+static JSON_FILE_ARG: &str = "json-file";
+
+impl<'a> ConfiguresBuilder<'a, &'a str, String> for JsonFile {
+    fn modify_builder(request_builder: RequestBuilder, value: String) -> Result<RequestBuilder, ErrorWrapper> {
+        Ok(request_builder.json(&value))
+    }
+
+    fn get_value(matches: &'a ArgMatches) -> Option<&str> {
+        matches.value_of(JSON_FILE_ARG)
+    }
+
+    fn process_value(value: &'a str) -> Result<String, ErrorWrapper> {
+        handle_file(&value)
+    }
+}
+
+impl ProvidesCLIArguments for JsonFile {
+    fn provide_arguments() -> Vec<Arg<'static>> {
+        vec![
+            Arg::new(JSON_FILE_ARG)
+                .about("Request's data as json, loaded from file path")
+                .takes_value(true)
+                .short('J')
+                .long("json-file")
                 .required(false)
         ]
     }

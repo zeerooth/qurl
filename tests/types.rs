@@ -4,10 +4,10 @@ use qurl::cli::app;
 use qurl::types::{
     auth::BasicAuth,
     auth::BearerAuth,
-    data::Body,
+    data::{Body, BodyFile},
 };
 use qurl::types::ConfiguresBuilder;
-use qurl::error::ErrorWrapper;
+use qurl::error::{ErrorWrapper, ParsingError};
 use reqwest::{ClientBuilder, Client, RequestBuilder};
 
 #[fixture]
@@ -49,8 +49,9 @@ fn test_get_value(value: Option<String>, result: Option<String>) {
     case(BasicAuth::process_value("username:password"), Ok(("username", "password"))),
     case(BearerAuth::process_value("SomeToken0987654321"), Ok("SomeToken0987654321")),
     case(Body::process_value("Lorem ipsum dolor sit amet, consectetur adipiscing elit"), Ok("Lorem ipsum dolor sit amet, consectetur adipiscing elit")),
+    case(BodyFile::process_value("/some/non/existing/path/to/file.json"), Err(ErrorWrapper::from(ParsingError::new("No such file: /some/non/existing/path/to/file.json"))))
 )]
 fn test_process_value<T: std::fmt::Debug + std::cmp::PartialEq>(value: Result<T, ErrorWrapper>, result: Result<T, ErrorWrapper>) {
-    assert_eq!(value.unwrap(), result.unwrap());
+    assert_eq!(value, result);
 }
 

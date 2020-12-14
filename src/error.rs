@@ -24,6 +24,12 @@ impl ErrorWrapper {
     }
 }
 
+impl PartialEq for ErrorWrapper {
+    fn eq(&self, other: &Self) -> bool {
+        self.inner.to_string() == other.inner.to_string()
+    }
+}
+
 #[derive(Debug)]
 pub struct ParsingError {
     info: String

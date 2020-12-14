@@ -1,7 +1,7 @@
 use reqwest::{Response, Client, ClientBuilder, Request, Method};
 use types::{
     auth::{BasicAuth, BearerAuth},
-    data::{Body, Json, JsonFile},
+    data::{Body, BodyFile, Json, JsonFile},
     multipart::{Headers, FormData, QueryString},
     proxy::Proxy,
     redirect::RedirectPolicy,
@@ -54,6 +54,7 @@ impl RequestParser {
         req_builder = BasicAuth::build(req_builder, matches)?;
         req_builder = BearerAuth::build(req_builder, matches)?;
         req_builder = Body::build(req_builder, matches)?;
+        req_builder = BodyFile::build(req_builder, matches)?;
         req_builder = Json::build(req_builder, matches)?;
         req_builder = JsonFile::build(req_builder, matches)?;
         req_builder = Headers::build(req_builder, matches)?;

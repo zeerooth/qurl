@@ -2,7 +2,8 @@
 
 #### Features
 * Allow custom methods
-* `--json-file <path>` allows for loading json data from file now
+* `--json-file <path>` and `--body-file <path>` allow for loading json/body data from file now,
+  conflicts with `--json` and `--body` accordingly
 
 #### Tests
 * Unit tests for error & types modules

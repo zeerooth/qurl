@@ -5,6 +5,7 @@ use crate::io::handle_file;
 use clap::{ArgMatches, Arg};
 
 pub struct Body;
+static BODY_ARG: &str = "body";
 
 impl<'a> ConfiguresBuilder<'a, &'a str, &'a str> for Body {
     fn modify_builder(request_builder: RequestBuilder, value: &'a str) -> Result<RequestBuilder, ErrorWrapper> {
@@ -12,7 +13,7 @@ impl<'a> ConfiguresBuilder<'a, &'a str, &'a str> for Body {
     }
 
     fn get_value(matches: &'a ArgMatches) -> Option<&str> {
-        matches.value_of("body")
+        matches.value_of(BODY_ARG)
     }
 
     fn process_value(value: &'a str) -> Result<&'a str, ErrorWrapper> {
@@ -23,17 +24,49 @@ impl<'a> ConfiguresBuilder<'a, &'a str, &'a str> for Body {
 impl ProvidesCLIArguments for Body {
     fn provide_arguments() -> Vec<Arg<'static>> {
         vec![
-            Arg::new("body")
-                .about("Request Body")
+            Arg::new(BODY_ARG)
+                .about("Request's Body")
                 .takes_value(true)
                 .short('b')
-                .long("body")
+                .long(BODY_ARG)
+                .required(false)
+        ]
+    }
+}
+
+pub struct BodyFile;
+static BODY_FILE_ARG: &str = "body-file";
+
+impl<'a> ConfiguresBuilder<'a, &'a str, String> for BodyFile {
+    fn modify_builder(request_builder: RequestBuilder, value: String) -> Result<RequestBuilder, ErrorWrapper> {
+        Ok(request_builder.body(value))
+    }
+
+    fn get_value(matches: &'a ArgMatches) -> Option<&str> {
+        matches.value_of(BODY_FILE_ARG)
+    }
+
+    fn process_value(value: &'a str) -> Result<String, ErrorWrapper> {
+        handle_file(&value)
+    }
+}
+
+impl ProvidesCLIArguments for BodyFile {
+    fn provide_arguments() -> Vec<Arg<'static>> {
+        vec![
+            Arg::new(BODY_FILE_ARG)
+                .about("Request's Body, loaded from file path")
+                .conflicts_with(BODY_ARG)
+                .takes_value(true)
+                .short('F')
+                .long(BODY_FILE_ARG)
                 .required(false)
         ]
     }
 }
 
 pub struct Json;
+static JSON_ARG: &str = "json";
 
 impl<'a> ConfiguresBuilder<'a, &'a str, &'a str> for Json {
     fn modify_builder(request_builder: RequestBuilder, value: &'a str) -> Result<RequestBuilder, ErrorWrapper> {
@@ -41,7 +74,7 @@ impl<'a> ConfiguresBuilder<'a, &'a str, &'a str> for Json {
     }
 
     fn get_value(matches: &'a ArgMatches) -> Option<&str> {
-        matches.value_of("json")
+        matches.value_of(JSON_ARG)
     }
 
     fn process_value(value: &'a str) -> Result<&'a str, ErrorWrapper> {
@@ -52,11 +85,11 @@ impl<'a> ConfiguresBuilder<'a, &'a str, &'a str> for Json {
 impl ProvidesCLIArguments for Json {
     fn provide_arguments() -> Vec<Arg<'static>> {
         vec![
-            Arg::new("json")
+            Arg::new(JSON_ARG)
                 .about("Request's data as json")
                 .takes_value(true)
                 .short('j')
-                .long("json")
+                .long(JSON_ARG)
                 .required(false)
         ]
     }
@@ -84,9 +117,10 @@ impl ProvidesCLIArguments for JsonFile {
         vec![
             Arg::new(JSON_FILE_ARG)
                 .about("Request's data as json, loaded from file path")
+                .conflicts_with(JSON_ARG)
                 .takes_value(true)
                 .short('J')
-                .long("json-file")
+                .long(JSON_FILE_ARG)
                 .required(false)
         ]
     }

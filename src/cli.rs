@@ -1,7 +1,7 @@
 use clap::{App, Arg, crate_version};
 use crate::types::{
     auth::{BasicAuth, BearerAuth},
-    data::{Body, Json, JsonFile},
+    data::{Body, BodyFile, Json, JsonFile},
     multipart::{Headers, FormData, QueryString},
     proxy::Proxy,
     redirect::RedirectPolicy,
@@ -39,6 +39,7 @@ pub fn app() -> App<'static> {
         .args(BasicAuth::provide_arguments())
         .args(BearerAuth::provide_arguments())
         .args(Body::provide_arguments())
+        .args(BodyFile::provide_arguments())
         .args(Json::provide_arguments())
         .args(JsonFile::provide_arguments())
         .args(FormData::provide_arguments())

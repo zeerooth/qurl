@@ -26,6 +26,7 @@ impl ProvidesCLIArguments for Body {
         vec![
             Arg::new(BODY_ARG)
                 .about("Request's Body")
+                .conflicts_with_all(&vec![JSON_ARG, BODY_FILE_ARG, JSON_FILE_ARG])
                 .takes_value(true)
                 .short('b')
                 .long(BODY_ARG)
@@ -56,7 +57,7 @@ impl ProvidesCLIArguments for BodyFile {
         vec![
             Arg::new(BODY_FILE_ARG)
                 .about("Request's Body, loaded from file path")
-                .conflicts_with(BODY_ARG)
+                .conflicts_with_all(&vec![BODY_ARG, JSON_FILE_ARG, JSON_ARG])
                 .takes_value(true)
                 .short('F')
                 .long(BODY_FILE_ARG)
@@ -87,6 +88,7 @@ impl ProvidesCLIArguments for Json {
         vec![
             Arg::new(JSON_ARG)
                 .about("Request's data as json")
+                .conflicts_with_all(&vec![BODY_ARG, JSON_FILE_ARG, BODY_FILE_ARG])
                 .takes_value(true)
                 .short('j')
                 .long(JSON_ARG)
@@ -117,7 +119,7 @@ impl ProvidesCLIArguments for JsonFile {
         vec![
             Arg::new(JSON_FILE_ARG)
                 .about("Request's data as json, loaded from file path")
-                .conflicts_with(JSON_ARG)
+                .conflicts_with_all(&vec![JSON_ARG, BODY_FILE_ARG, BODY_ARG])
                 .takes_value(true)
                 .short('J')
                 .long(JSON_FILE_ARG)

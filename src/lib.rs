@@ -27,7 +27,7 @@ pub struct RequestParser {
     client: Client
 }
 
-impl RequestParser {
+impl<'a> RequestParser {
     pub fn new(matches: ArgMatches) -> Result<RequestParser, ErrorWrapper> {
         let client = RequestParser::configure_client(&matches)?;
         let request = RequestParser::configure_request(&client, &matches)?;
@@ -42,25 +42,30 @@ impl RequestParser {
         Ok(client_builder.build()?)
     }
 
-    pub fn configure_request(client: &Client, matches: &ArgMatches) -> Result<Request, ErrorWrapper> {
+    pub fn configure_request(client: &Client, matches: &'a ArgMatches) -> Result<Request, ErrorWrapper> {
         let url = match matches.value_of("url") {
             Some(url) => url,
             None => return Err(ParsingError::new("no url provided").into())
         };
         let mut req_builder = match matches.value_of("method") {
-            Some(method) => client.request(Method::from_bytes(&method.as_bytes())?, url),
+            Some(method) => client.request(Method::from_bytes(&method.to_uppercase().as_bytes())?, url),
             None => return Err(ParsingError::new("No method provided").into())
         };
-        req_builder = BasicAuth::build(req_builder, matches)?;
-        req_builder = BearerAuth::build(req_builder, matches)?;
-        req_builder = Body::build(req_builder, matches)?;
-        req_builder = BodyFile::build(req_builder, matches)?;
-        req_builder = Json::build(req_builder, matches)?;
-        req_builder = JsonFile::build(req_builder, matches)?;
-        req_builder = Headers::build(req_builder, matches)?;
-        req_builder = FormData::build(req_builder, matches)?;
-        req_builder = QueryString::build(req_builder, matches)?;
-        req_builder = Timeout::build(req_builder, matches)?;
+        let builder_functions: Vec<&dyn Fn(reqwest::RequestBuilder, &'a ArgMatches) -> Result<reqwest::RequestBuilder, ErrorWrapper>> = vec![
+            &BasicAuth::build,
+            &BearerAuth::build,
+            &Body::build,
+            &BodyFile::build,
+            &Json::build,
+            &JsonFile::build,
+            &Headers::build,
+            &FormData::build,
+            &QueryString::build,
+            &Timeout::build,
+        ];
+        for func in builder_functions {
+            req_builder = func(req_builder, matches)?;
+        }
         Ok(req_builder.build()?)
     }
 
@@ -70,6 +75,7 @@ impl RequestParser {
             Err(err) => Err(format!("{}", err))
         }
     }
+
 }
 
 impl Display for RequestParser {

@@ -151,3 +151,31 @@ fn test_commands<T: Predicate<str>>(args: Vec<String>, success: bool, text: T) -
     };
     Ok(())
 }
+
+#[rstest(
+    arg_one => [("--body",  "<body>"), ("--json", "<json>"), ("--json-file", "<json-file>"), ("--body-file", "<body-file>")],
+    arg_two => [("--body",  "<body>"), ("--json", "<json>"), ("--json-file", "<json-file>"), ("--body-file", "<body-file>")],
+)]
+fn test_conflicts(arg_one: (&str, &str), arg_two: (&str, &str)) {
+    let mut start_arg = vec!["get", "http://example.com/"];
+    start_arg.extend(vec![arg_one.0, "test", arg_two.0, "test"]);
+    let cmd = Command::cargo_bin("qurl")
+        .unwrap()
+        .args(start_arg)
+        .assert()
+        .failure();
+    if arg_one == arg_two {
+        cmd.stderr(
+            predicate::str::contains(
+                format!("The argument '{} {}' was provided more than once, but cannot be used multiple times", arg_one.0, arg_one.1)
+            )
+        );
+    }
+    else {
+        cmd.stderr(
+            predicate::str::contains(
+                format!("The argument '{} {}' cannot be used with '{} {}'", arg_two.0, arg_two.1, arg_one.0, arg_one.1)
+            )
+        );
+    }
+}

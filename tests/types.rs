@@ -54,4 +54,3 @@ fn test_get_value(value: Option<String>, result: Option<String>) {
 fn test_process_value<T: std::fmt::Debug + std::cmp::PartialEq>(value: Result<T, ErrorWrapper>, result: Result<T, ErrorWrapper>) {
     assert_eq!(value, result);
 }
-

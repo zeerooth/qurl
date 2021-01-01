@@ -59,7 +59,7 @@ $ qurl https://httpbin.org/get -v --header accept:application/json
 What about posting some json data?:
 
 ```bash
-$ qurl post https://httpbin.org/post -v --json '{example:"json"}'
+$ qurl post https://httpbin.org/post -v --json '{"example":"json"}'
 ```
 
 
